@@ -6,7 +6,7 @@ import "./index.css";
 function App() {
   useEffect(() => {
     // 60 adet donut oluştur
-    const count = 60;
+    const count = 120;
     for (let i = 0; i < count; i++) {
       const img = document.createElement("div");
       img.className = "donut";
