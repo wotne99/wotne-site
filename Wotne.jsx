@@ -113,8 +113,8 @@ const Wotne = () => {
       {filteredAccounts.length > 0 ? (
         filteredAccounts.map((account, index) => (
           <div className="card" key={index}>
-            <h2>Account #{index + 1}</h2>
-            <p><strong>TAG:</strong> {account.tag}</p>
+            <h2>{account.tag}</h2>
+
             <p><strong>Region:</strong> {account.server}</p>
             <p><strong>Level:</strong> {account.level}</p>
             <p><strong>Skins:</strong> {account.skins}</p>
