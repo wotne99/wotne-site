@@ -9,21 +9,27 @@ const Wotne = () => {
       .then((res) => res.json())
       .then((data) => {
         const parsed = data.map((item) => {
-          const lines = item.text.split('\n').map(line => line.trim());
+          const lines = item.text.split('\n').map(line => line.trim()).filter(Boolean);
+
+          const getLine = (label) => {
+            const line = lines.find(l => l.startsWith(label));
+            return line ? line.replace(label, '').trim() : 'undefined';
+          };
 
           return {
             id: item.id,
-            server: lines[0] || '',
-            level: lines[1]?.replace('Level: ', '') || '',
-            sku: lines[2]?.replace('SKU: ', '') || '',
-            skins: lines[3] || '',
-            country: lines[4]?.replace('Hesabın Oluşturulduğu Ülke: ', '') || '',
-            matchHistory: lines[5]?.replace('Karşılaşma Geçmişi: ', '') || '',
-            lastGame: lines[6]?.replace('Son Oyun Tarihi: ', '') || '',
-            crystals: lines[7]?.replace('Hesaptaki Toplam Kostüm Kristali Sayısı: ', '') || '',
-            price: lines[10] || ''
+            server: lines[0] || 'undefined',
+            level: getLine('Level:'),
+            sku: getLine('SKU:'),
+            skins: lines[3] || 'undefined',
+            country: getLine('Hesabın Oluşturulduğu Ülke:'),
+            matchHistory: getLine('Karşılaşma Geçmişi:'),
+            lastGame: getLine('Son Oyun Tarihi:'),
+            crystals: getLine('Hesaptaki Toplam Kostüm Kristali Sayısı:'),
+            price: lines.find(line => line.startsWith('₺')) || 'undefined'
           };
         });
+
         setAccounts(parsed);
       })
       .catch((error) => {
