@@ -159,9 +159,9 @@ const Wotne = () => {
         <p>No matching accounts found.</p>
       )}
 
-      {/* Sayfalama metni */}
+      {/* ✅ İngilizce sayfalama metni */}
       <p className="pagination-info">
-        {`${filteredAccounts.length} hesap arasından ${indexOfFirstAccount + 1} - ${Math.min(indexOfLastAccount, filteredAccounts.length)} arasındaki sonuçlar görüntüleniyor.`}
+        {`Showing results ${indexOfFirstAccount + 1} - ${Math.min(indexOfLastAccount, filteredAccounts.length)} out of ${filteredAccounts.length} accounts.`}
       </p>
 
       {/* Pagination */}
