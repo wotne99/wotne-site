@@ -1,98 +1,60 @@
-import { useState } from "react";
+import React, { useEffect, useState } from 'react';
+import './index.css';
 
-const accounts = [
-  {
-    id: "EUW_ACC_104985",
-    region: "EUW",
-    blue_essence: 45410,
-    orange_essence: 1090,
-    skins: [
-      "Barbar Sion",
-      "Waterloo Miss Fortune",
-      "Bozulmuş Yemin Miss Fortune",
-      "Savaş Ustası Azir",
-      "Kaleci Maokai",
-      "Eternum Cassiopeia",
-      "Kumbelası Skarner",
-      "Cadı Poppy",
-      "Havuz Partisi Leona"
-    ],
-    price_usd: 8.48
-  },
-  {
-    id: "EUW_ACC_108710",
-    region: "EUW",
-    blue_essence: 45250,
-    orange_essence: 1218,
-    skins: [
-      "Semavipullu Master Yi",
-      "Uzay Serüveni Kha'Zix",
-      "Parlak Çekiç Jayce",
-      "Meka Aurelion Sol",
-      "Ayın Elemanı Sivir",
-      "Waterloo Miss Fortune",
-      "Gizli Ajan Xin Zhao",
-      "Arş Hükümdarı Vex",
-      "Yıldız Düşmanı Fiddlesticks"
-    ],
-    price_usd: 8.48
-  }
-];
+const Wotne = () => {
+  const [accounts, setAccounts] = useState([]);
 
-export default function Wotne() {
-  const [query, setQuery] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc");
+  useEffect(() => {
+    fetch('/accounts.json')
+      .then((res) => res.json())
+      .then((data) => {
+        const parsed = data.map((item) => {
+          const lines = item.text.split('\n').map(line => line.trim());
 
-  const filtered = accounts
-    .filter((acc) =>
-      acc.skins.some((skin) => skin.toLowerCase().includes(query.toLowerCase()))
-    )
-    .sort((a, b) =>
-      sortOrder === "asc"
-        ? a.price_usd - b.price_usd
-        : b.price_usd - a.price_usd
-    );
+          return {
+            id: item.id,
+            server: lines[0] || '',
+            level: lines[1]?.replace('Level: ', '') || '',
+            sku: lines[2]?.replace('SKU: ', '') || '',
+            skins: lines[3] || '',
+            country: lines[4]?.replace('Hesabın Oluşturulduğu Ülke: ', '') || '',
+            matchHistory: lines[5]?.replace('Karşılaşma Geçmişi: ', '') || '',
+            lastGame: lines[6]?.replace('Son Oyun Tarihi: ', '') || '',
+            crystals: lines[7]?.replace('Hesaptaki Toplam Kostüm Kristali Sayısı: ', '') || '',
+            price: lines[10] || ''
+          };
+        });
+        setAccounts(parsed);
+      })
+      .catch((error) => {
+        console.error('Veri alınamadı:', error);
+      });
+  }, []);
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">WOTNE - Fresh LoL Accounts</h1>
-      <div className="flex gap-4 mb-6">
-        <input
-          className="border p-2 flex-1 rounded"
-          type="text"
-          placeholder="Search by skin name..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <select
-          className="border p-2 rounded"
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-        >
-          <option value="asc">Price: Low to High</option>
-          <option value="desc">Price: High to Low</option>
-        </select>
-      </div>
-
-      <div className="grid gap-4">
-        {filtered.map((acc) => (
-          <div key={acc.id} className="border p-4 rounded shadow">
-            <div className="font-bold text-lg">{acc.id}</div>
-            <div className="text-sm">Region: {acc.region}</div>
-            <div className="text-sm">Blue Essence: {acc.blue_essence}</div>
-            <div className="text-sm">Orange Essence: {acc.orange_essence}</div>
-            <div className="text-sm">Price: ${acc.price_usd}</div>
-            <div className="mt-2">
-              <div className="font-semibold text-sm">Skins:</div>
-              <ul className="list-disc list-inside text-sm">
-                {acc.skins.map((skin, i) => (
-                  <li key={i}>{skin}</li>
-                ))}
-              </ul>
-            </div>
+    <div className="container">
+      <h1>WOTNE Hesap Kataloğu</h1>
+      {accounts.length > 0 ? (
+        accounts.map((account, index) => (
+          <div className="card" key={index}>
+            <h2>{index + 1}. Hesap</h2>
+            <p><strong>Sunucu:</strong> {account.server}</p>
+            <p><strong>Seviye:</strong> {account.level}</p>
+            <p><strong>SKU:</strong> {account.sku}</p>
+            <p><strong>Kostümler:</strong> {account.skins}</p>
+            <p><strong>Ülke:</strong> {account.country}</p>
+            <p><strong>Oyun Geçmişi:</strong> {account.matchHistory}</p>
+            <p><strong>Son Oyun:</strong> {account.lastGame}</p>
+            <p><strong>Kristal:</strong> {account.crystals}</p>
+            <p><strong>Fiyat:</strong> {account.price}</p>
+            <hr />
           </div>
-        ))}
-      </div>
+        ))
+      ) : (
+        <p>Veriler alınamadı.</p>
+      )}
     </div>
   );
-}
+};
+
+export default Wotne;
