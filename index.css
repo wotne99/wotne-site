@@ -65,6 +65,8 @@ body {
   z-index: 0;
   transform: rotate(0deg);
 }
+
+/* Sayfalama */
 .pagination {
   margin-top: 20px;
   display: flex;
@@ -80,6 +82,11 @@ body {
   padding: 6px 12px;
   border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pagination button:hover {
+  background-color: #444;
 }
 
 .pagination button.active {
@@ -90,6 +97,15 @@ body {
 .pagination button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Sayfalama açıklaması */
+.pagination-info {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #aaa;
 }
 
 /* Scroll çubuğu gizlenebilir istenirse */
