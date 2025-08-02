@@ -1,39 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import './index.css';
+import React, { useEffect, useState } from "react";
+import "./index.css";
 
 const Wotne = () => {
   const [accounts, setAccounts] = useState([]);
 
   useEffect(() => {
-    fetch('/accounts.json')
+    fetch("/accounts.json")
       .then((res) => res.json())
       .then((data) => {
         const parsed = data.map((item) => {
-          const text = item.text;
-
-          const extract = (pattern) => {
-            const match = text.match(pattern);
-            return match ? match[1].trim() : 'undefined';
-          };
+          const lines = item.text.split("\n").map((line) => line.trim()).filter(Boolean);
 
           return {
             id: item.id,
-            server: extract(/^([A-Z]{2,4})$/m),
-            level: extract(/Level:\s*(.*)/),
-            sku: extract(/SKU:\s*(.*)/),
-            skins: extract(/SKU:.*?\n(.*?)\nHesabın Oluşturulduğu Ülke:/s),
-            country: extract(/Hesabın Oluşturulduğu Ülke:\s*(.*)/),
-            matchHistory: extract(/Karşılaşma Geçmişi:\s*(.*)/),
-            lastGame: extract(/Son Oyun Tarihi:\s*(.*)/),
-            crystals: extract(/Kristali Sayısı:\s*(\d+)/),
-            price: extract(/(₺\d+,\d+)/),
+            server: lines[0] || "undefined",
+            level: lines[1]?.replace("Level: ", "") || "undefined",
+            sku: lines[2]?.replace("SKU: ", "") || "undefined",
+            skins: lines[3] || "undefined",
+            country: lines.find((l) => l.startsWith("Hesabın Oluşturulduğu Ülke:"))?.split(": ")[1] || "undefined",
+            matchHistory: lines.find((l) => l.startsWith("Karşılaşma Geçmişi:"))?.split(": ")[1] || "undefined",
+            lastGame: lines.find((l) => l.startsWith("Son Oyun Tarihi:"))?.split(": ")[1] || "undefined",
+            crystals: lines.find((l) => l.includes("Kristali Sayısı:"))?.match(/\d+/)?.[0] || "undefined",
+            price: lines.find((l) => l.includes("₺")) || "undefined",
           };
         });
 
         setAccounts(parsed);
       })
       .catch((error) => {
-        console.error('Veri alınamadı:', error);
+        console.error("Veri alınamadı:", error);
       });
   }, []);
 
