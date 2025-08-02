@@ -6,40 +6,41 @@ import "./index.css";
 function App() {
   useEffect(() => {
     const count = 220;
-    const minDistance = 60; // piksel cinsinden minimum mesafe
+    const minDistance = 60;
     const positions = [];
 
     for (let i = 0; i < count; i++) {
-      let x, y;
-      let tooClose;
+      let x, y, tooClose;
 
-      // Uygun konum bulana kadar tekrar dene
+      // Uygun konum bulana kadar dene
       do {
         x = Math.random() * window.innerWidth;
         y = Math.random() * window.innerHeight;
 
         tooClose = positions.some(
-          (pos) =>
-            Math.hypot(pos.x - x, pos.y - y) < minDistance
+          (pos) => Math.hypot(pos.x - x, pos.y - y) < minDistance
         );
       } while (tooClose);
 
       positions.push({ x, y });
 
-      const img = document.createElement("div");
-      img.className = "donut";
+      const size = Math.floor(Math.random() * (80 - 30 + 1)) + 30;
 
-      img.style.position = "fixed";
-      img.style.top = `${y}px`;
-      img.style.left = `${x}px`;
+      const donut = document.createElement("div");
+      donut.className = "donut";
+      donut.style.position = "fixed";
+      donut.style.width = `${size}px`;
+      donut.style.height = `${size}px`;
+      donut.style.top = `${y}px`;
+      donut.style.left = `${x}px`;
 
-      const rotation = Math.floor(Math.random() * 360);
-      img.style.transform = `rotate(${rotation}deg)`;
+      let transform = `rotate(${Math.floor(Math.random() * 360)}deg)`;
       if (Math.random() > 0.5) {
-        img.style.transform += " scaleX(-1)";
+        transform += " scaleX(-1)";
       }
+      donut.style.transform = transform;
 
-      document.body.appendChild(img);
+      document.body.appendChild(donut);
     }
   }, []);
 
