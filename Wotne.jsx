@@ -9,24 +9,24 @@ const Wotne = () => {
       .then((res) => res.json())
       .then((data) => {
         const parsed = data.map((item) => {
-          const lines = item.text.split('\n').map(line => line.trim()).filter(Boolean);
+          const text = item.text;
 
-          const getLine = (label) => {
-            const line = lines.find(l => l.startsWith(label));
-            return line ? line.replace(label, '').trim() : 'undefined';
+          const extract = (pattern) => {
+            const match = text.match(pattern);
+            return match ? match[1].trim() : 'undefined';
           };
 
           return {
             id: item.id,
-            server: lines[0] || 'undefined',
-            level: getLine('Level:'),
-            sku: getLine('SKU:'),
-            skins: lines[3] || 'undefined',
-            country: getLine('Hesabın Oluşturulduğu Ülke:'),
-            matchHistory: getLine('Karşılaşma Geçmişi:'),
-            lastGame: getLine('Son Oyun Tarihi:'),
-            crystals: getLine('Hesaptaki Toplam Kostüm Kristali Sayısı:'),
-            price: lines.find(line => line.startsWith('₺')) || 'undefined'
+            server: extract(/^([A-Z]{2,4})$/m),
+            level: extract(/Level:\s*(.*)/),
+            sku: extract(/SKU:\s*(.*)/),
+            skins: extract(/SKU:.*?\n(.*?)\nHesabın Oluşturulduğu Ülke:/s),
+            country: extract(/Hesabın Oluşturulduğu Ülke:\s*(.*)/),
+            matchHistory: extract(/Karşılaşma Geçmişi:\s*(.*)/),
+            lastGame: extract(/Son Oyun Tarihi:\s*(.*)/),
+            crystals: extract(/Kristali Sayısı:\s*(\d+)/),
+            price: extract(/(₺\d+,\d+)/),
           };
         });
 
