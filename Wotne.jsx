@@ -1,23 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import './index.css';
 
+// Özel yuvarlama fonksiyonu
+const roundToNearestHalfOrWhole = (num) => {
+  const floor = Math.floor(num);
+  const decimal = num - floor;
+
+  if (decimal < 0.25) return floor;
+  if (decimal < 0.75) return floor + 0.5;
+  return Math.ceil(num);
+};
+
+// Basit checksum (tag güvenliği için mini hash)
+const generateChecksum = (input) => {
+  let sum = 0;
+  for (let i = 0; i < input.length; i++) {
+    sum += input.charCodeAt(i) * (i + 1);
+  }
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  return [
+    chars[sum % chars.length],
+    chars[(sum + 11) % chars.length],
+    chars[(sum + 23) % chars.length]
+  ].join('');
+};
+
 const Wotne = () => {
   const [accounts, setAccounts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Basit checksum fonksiyonu (veriye özel mini hash gibi)
-  const generateChecksum = (input) => {
-    let sum = 0;
-    for (let i = 0; i < input.length; i++) {
-      sum += input.charCodeAt(i) * (i + 1);
-    }
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return [
-      chars[sum % chars.length],
-      chars[(sum + 11) % chars.length],
-      chars[(sum + 23) % chars.length]
-    ].join('');
-  };
 
   useEffect(() => {
     fetch('/accounts.json')
@@ -42,11 +52,23 @@ const Wotne = () => {
           const priceMatch = text.match(/₺\d+[.,]?\d*/);
           const price = priceMatch ? priceMatch[0] : 'undefined';
 
+          // ✅ USD hesapla
+          let priceUsd = 'undefined';
+          if (priceMatch) {
+            const priceNumber = parseFloat(priceMatch[0].replace('₺', '').replace(',', '.'));
+            const dollarRate = 40.65;
+            const usdBase = priceNumber / dollarRate;
+            const usdIncreased = usdBase * 1.75;
+            const usdRounded = roundToNearestHalfOrWhole(usdIncreased);
+            priceUsd = `$${usdRounded.toFixed(2)}`;
+          }
+
+          // ✅ Skins: between SKU and Country
           const startIdx = lines.findIndex((l) => l.startsWith('SKU:')) + 1;
           const endIdx = lines.findIndex((l) => l.startsWith('Account Creation Country:'));
           const skins = lines.slice(startIdx, endIdx).join(', ');
 
-          // ✅ TAG Oluştur
+          // ✅ TAG oluştur
           const skuDigits = sku.match(/\d+$/)?.[0] || '000';
           const checksum = generateChecksum(lastGame + skins);
           const tag = `${server}-${skuDigits}-${checksum}`;
@@ -56,13 +78,12 @@ const Wotne = () => {
             tag,
             server,
             level,
-            sku,
             skins,
             country,
             matchHistory,
             lastGame,
             crystals,
-            price
+            priceUsd
           };
         });
 
@@ -101,7 +122,7 @@ const Wotne = () => {
             <p><strong>Match History:</strong> {account.matchHistory}</p>
             <p><strong>Last Game:</strong> {account.lastGame}</p>
             <p><strong>Skin Shards:</strong> {account.crystals}</p>
-            <p><strong>Price:</strong> {account.price}</p>
+            <p><strong>Price (USD):</strong> {account.priceUsd}</p>
             <hr />
           </div>
         ))
