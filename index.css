@@ -65,6 +65,32 @@ body {
   z-index: 0;
   transform: rotate(0deg);
 }
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  background: #222;
+  border: 1px solid #555;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination button.active {
+  background-color: #3498db;
+  font-weight: bold;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 /* Scroll çubuğu gizlenebilir istenirse */
 /* ::-webkit-scrollbar {
