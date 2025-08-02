@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './index.css';
 
-// Fiyat yuvarlama
 const roundToNearestHalfOrWhole = (num) => {
   const floor = Math.floor(num);
   const decimal = num - floor;
@@ -10,7 +9,6 @@ const roundToNearestHalfOrWhole = (num) => {
   return Math.ceil(num);
 };
 
-// Mini checksum (TAG için)
 const generateChecksum = (input) => {
   let sum = 0;
   for (let i = 0; i < input.length; i++) {
@@ -127,6 +125,14 @@ const Wotne = () => {
     return pages;
   };
 
+  const highlightSkins = (skins, term) => {
+    if (!term) return skins;
+    const regex = new RegExp(`(${term})`, 'gi');
+    return skins.split(regex).map((part, i) =>
+      regex.test(part) ? <mark key={i}>{part}</mark> : part
+    );
+  };
+
   return (
     <div className="container">
       <h1>DONUT ACCOUNTS</h1>
@@ -144,14 +150,14 @@ const Wotne = () => {
 
       {currentAccounts.length > 0 ? (
         currentAccounts.map((account, index) => (
-          <div className="card" key={index}>
+          <div className={`card ${account.isSpecial ? 'special' : ''}`} key={index}>
             <h2>
               TAG: {account.tag}{' '}
               {account.isSpecial && <span style={{ color: 'gold', fontSize: '1rem' }}>⭐ SPECIAL</span>}
             </h2>
             <p><strong>Region:</strong> {account.server}</p>
             <p><strong>Level:</strong> {account.level}</p>
-            <p><strong>Skins:</strong> {account.skins}</p>
+            <p><strong>Skins:</strong> {highlightSkins(account.skins, searchTerm)}</p>
             <p><strong>Country:</strong> {account.country}</p>
             <p><strong>Match History:</strong> {account.matchHistory}</p>
             <p><strong>Last Game:</strong> {account.lastGame}</p>
