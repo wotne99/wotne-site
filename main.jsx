@@ -1,38 +1,36 @@
-import React, { useEffect } from "react";
-import ReactDOM from "react-dom/client";
-import Wotne from "./Wotne";
-import "./index.css";
+useEffect(() => {
+  const count = 120;
+  const minDistance = 60;
+  const positions = [];
 
-function App() {
-  useEffect(() => {
-    // 60 adet donut oluştur
-    const count = 120;
-    for (let i = 0; i < count; i++) {
-      const img = document.createElement("div");
-      img.className = "donut";
+  for (let i = 0; i < count; i++) {
+    let x, y;
+    let tooClose;
 
-      // Ekrana rastgele konum
-      img.style.top = `${Math.random() * 100}vh`;
-      img.style.left = `${Math.random() * 100}vw`;
+    // Uygun bir yer bulana kadar tekrar dene
+    do {
+      x = Math.random() * window.innerWidth;
+      y = Math.random() * window.innerHeight;
+      tooClose = positions.some(
+        (pos) =>
+          Math.hypot(pos.x - x, pos.y - y) < minDistance
+      );
+    } while (tooClose);
 
-      // Rastgele dönüş açısı
-      const rotation = Math.floor(Math.random() * 360);
-      img.style.transform = `rotate(${rotation}deg)`;
+    positions.push({ x, y });
 
-      // Bazen yatay çevir (ayna efekti)
-      if (Math.random() > 0.5) {
-        img.style.transform += " scaleX(-1)";
-      }
+    const img = document.createElement("div");
+    img.className = "donut";
 
-      document.body.appendChild(img);
+    img.style.left = `${x}px`;
+    img.style.top = `${y}px`;
+
+    const rotation = Math.floor(Math.random() * 360);
+    img.style.transform = `rotate(${rotation}deg)`;
+    if (Math.random() > 0.5) {
+      img.style.transform += " scaleX(-1)";
     }
-  }, []);
 
-  return (
-    <React.StrictMode>
-      <Wotne />
-    </React.StrictMode>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    document.body.appendChild(img);
+  }
+}, []);
