@@ -38,12 +38,13 @@ const Wotne = () => {
           const text = item.text;
           const lines = text.split('\n').map((line) => line.trim());
 
+          const isSpecial = lines[0] === 'SPECIAL Account';
+          const server = isSpecial ? lines[1] : lines[0];
           const getValue = (prefix) => {
             const line = lines.find((l) => l.startsWith(prefix));
             return line ? line.replace(prefix, '').trim() : 'undefined';
           };
 
-          const server = lines[0] || 'undefined';
           const level = getValue('Level:');
           const sku = getValue('SKU:');
           const country = getValue('Account Creation Country:');
@@ -82,6 +83,7 @@ const Wotne = () => {
             lastGame,
             crystals,
             priceUsd,
+            isSpecial,
           };
         });
 
@@ -143,7 +145,10 @@ const Wotne = () => {
       {currentAccounts.length > 0 ? (
         currentAccounts.map((account, index) => (
           <div className="card" key={index}>
-            <h2>{`TAG: ${account.tag}`}</h2>
+            <h2>
+              TAG: {account.tag}{' '}
+              {account.isSpecial && <span style={{ color: 'gold', fontSize: '1rem' }}>⭐ SPECIAL</span>}
+            </h2>
             <p><strong>Region:</strong> {account.server}</p>
             <p><strong>Level:</strong> {account.level}</p>
             <p><strong>Skins:</strong> {account.skins}</p>
@@ -159,12 +164,10 @@ const Wotne = () => {
         <p>No matching accounts found.</p>
       )}
 
-      {/* ✅ İngilizce sayfalama metni */}
       <p className="pagination-info">
-        {`Showing results ${indexOfFirstAccount + 1} - ${Math.min(indexOfLastAccount, filteredAccounts.length)} out of ${filteredAccounts.length} accounts.`}
+        Showing {indexOfFirstAccount + 1} - {Math.min(indexOfLastAccount, filteredAccounts.length)} of {filteredAccounts.length} results.
       </p>
 
-      {/* Pagination */}
       <div className="pagination">
         <button onClick={firstPage} disabled={currentPage === 1}>{'<<'}</button>
         <button onClick={prevPage} disabled={currentPage === 1}>{'<'}</button>
