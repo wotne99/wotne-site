@@ -44,7 +44,7 @@ const Wotne = () => {
 
   return (
     <div className="container">
-      <h1><h1>DONUT ACCOUNTS</h1></h1>
+      <h1>DONUT ACCOUNTS</h1>
 
       <input
         type="text"
