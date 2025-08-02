@@ -36,9 +36,8 @@ const Wotne = () => {
           const lastGame = getValue('Last Game Date:');
           const crystals = getValue('Total Skin Shard Count of Account:');
           const priceMatch = text.match(/₺\d+[.,]?\d*/);
-          const price = priceMatch ? priceMatch[0] : 'undefined';
 
-          // Dolar fiyatı hesaplama ve yuvarlama
+          // USD fiyatı hesapla
           let priceUsd = 'undefined';
           if (priceMatch) {
             const priceNumber = parseFloat(priceMatch[0].replace('₺', '').replace(',', '.'));
@@ -64,7 +63,6 @@ const Wotne = () => {
             matchHistory,
             lastGame,
             crystals,
-            price,
             priceUsd,
           };
         });
@@ -104,7 +102,6 @@ const Wotne = () => {
             <p><strong>Match History:</strong> {account.matchHistory}</p>
             <p><strong>Last Game:</strong> {account.lastGame}</p>
             <p><strong>Skin Shards:</strong> {account.crystals}</p>
-            <p><strong>Price (₺):</strong> {account.price}</p>
             <p><strong>Price (USD):</strong> {account.priceUsd}</p>
             <hr />
           </div>
