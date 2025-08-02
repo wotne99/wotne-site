@@ -5,7 +5,7 @@ import "./index.css";
 
 function App() {
   useEffect(() => {
-    const count = 160;
+    const count = 220;
     const minDistance = 60; // piksel cinsinden minimum mesafe
     const positions = [];
 
