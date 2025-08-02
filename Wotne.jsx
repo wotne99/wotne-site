@@ -3,25 +3,31 @@ import './index.css';
 
 const Wotne = () => {
   const [accounts, setAccounts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetch('/accounts.json')
       .then((res) => res.json())
       .then((data) => {
         const parsed = data.map((item) => {
-          const lines = item.text.split('\n').filter(Boolean);
+          const text = item.text;
+
+          const extract = (pattern) => {
+            const match = text.match(pattern);
+            return match ? match[1].trim() : 'undefined';
+          };
 
           return {
             id: item.id,
-            server: lines[0] || 'undefined',
-            level: lines[1]?.replace("Level: ", "") || 'undefined',
-            sku: lines[2]?.replace("SKU: ", "") || 'undefined',
-            skins: lines[3] || 'undefined',
-            country: lines[4]?.replace("Hesabın Oluşturulduğu Ülke: ", "") || 'undefined',
-            matchHistory: lines[5]?.replace("Karşılaşma Geçmişi: ", "") || 'undefined',
-            lastGame: lines[6]?.replace("Son Oyun Tarihi: ", "") || 'undefined',
-            crystals: lines[7]?.replace("Hesaptaki Toplam Kostüm Kristali Sayısı: ", "") || 'undefined',
-            price: lines[11] || 'undefined',
+            server: extract(/^([A-Z]{2,4})$/m),
+            level: extract(/Level:\s*(.*)/),
+            sku: extract(/SKU:\s*(.*)/),
+            skins: extract(/SKU:.*?\n(.*?)\nHesabın Oluşturulduğu Ülke:/s),
+            country: extract(/Hesabın Oluşturulduğu Ülke:\s*(.*)/),
+            matchHistory: extract(/Karşılaşma Geçmişi:\s*(.*)/),
+            lastGame: extract(/Son Oyun Tarihi:\s*(.*)/),
+            crystals: extract(/Kristali Sayısı:\s*(\d+)/),
+            price: extract(/(₺\d+,\d+)/),
           };
         });
 
@@ -32,11 +38,24 @@ const Wotne = () => {
       });
   }, []);
 
+  const filteredAccounts = accounts.filter((acc) =>
+    acc.skins.toLowerCase().includes(searchTerm)
+  );
+
   return (
     <div className="container">
       <h1>WOTNE Hesap Kataloğu</h1>
-      {accounts.length > 0 ? (
-        accounts.map((account, index) => (
+
+      <input
+        type="text"
+        placeholder="Kostüm veya Şampiyon Ara..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
+        className="search-input"
+      />
+
+      {filteredAccounts.length > 0 ? (
+        filteredAccounts.map((account, index) => (
           <div className="card" key={index}>
             <h2>{index + 1}. Hesap</h2>
             <p><strong>Sunucu:</strong> {account.server}</p>
@@ -52,7 +71,7 @@ const Wotne = () => {
           </div>
         ))
       ) : (
-        <p>Veriler alınamadı.</p>
+        <p>Eşleşen hesap bulunamadı.</p>
       )}
     </div>
   );
