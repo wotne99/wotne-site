@@ -10,14 +10,14 @@ body {
   position: relative;
 }
 
-/* Hesap kartlarını düzenleyen stil */
+/* Konteyner ve arama çubuğu */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   z-index: 2;
   position: relative;
-  text-align: center; /* arama çubuğu ve başlığı ortalamak için */
+  text-align: center;
 }
 
 .search-input {
@@ -39,9 +39,16 @@ body {
   padding: 20px;
   margin-bottom: 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  text-align: left; /* içerik sola hizalı kalsın */
+  text-align: left;
 }
 
+/* SPECIAL hesaplara özel görünüm */
+.card.special {
+  border: 2px solid gold;
+  background: #1a1a1a;
+}
+
+/* Kart başlıkları */
 .card h2 {
   color: #eee;
   font-size: 1.5rem;
@@ -53,12 +60,12 @@ body {
   color: #bbb;
 }
 
-/* Arka planda görünen rastgele konumlu donut görselleri */
+/* Donut görselleri */
 .donut {
   position: absolute;
   width: 64px;
   height: 64px;
-  background-image: url('/donut.png'); /* görselin yolu */
+  background-image: url('/donut.png');
   background-size: cover;
   opacity: 0.25;
   pointer-events: none;
@@ -82,11 +89,6 @@ body {
   padding: 6px 12px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.pagination button:hover {
-  background-color: #444;
 }
 
 .pagination button.active {
@@ -99,16 +101,10 @@ body {
   cursor: not-allowed;
 }
 
-/* Sayfalama açıklaması */
+/* Sayfalama bilgi metni */
 .pagination-info {
+  margin: 20px 0 10px;
+  font-size: 0.9rem;
+  color: #999;
   text-align: center;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  font-size: 14px;
-  color: #aaa;
 }
-
-/* Scroll çubuğu gizlenebilir istenirse */
-/* ::-webkit-scrollbar {
-  display: none;
-} */
