@@ -11,30 +11,46 @@ const Wotne = () => {
       .then((data) => {
         const parsed = data.map((item) => {
           const text = item.text;
+          const lines = text.split('\n').map((line) => line.trim());
 
-          const extract = (pattern) => {
-            const match = text.match(pattern);
-            return match ? match[1].trim() : 'undefined';
+          const getValue = (prefix) => {
+            const line = lines.find((l) => l.startsWith(prefix));
+            return line ? line.replace(prefix, '').trim() : 'undefined';
           };
+
+          const server = lines[0] || 'undefined';
+          const level = getValue('Level:');
+          const sku = getValue('SKU:');
+          const country = getValue('Account Creation Country:');
+          const matchHistory = getValue('Match History:');
+          const lastGame = getValue('Last Game Date:');
+          const crystals = getValue('Total Skin Shard Count of Account:');
+          const priceMatch = text.match(/₺\d+[.,]?\d*/);
+          const price = priceMatch ? priceMatch[0] : 'undefined';
+
+          // Skins: between SKU and Country
+          const startIdx = lines.findIndex((l) => l.startsWith('SKU:')) + 1;
+          const endIdx = lines.findIndex((l) => l.startsWith('Account Creation Country:'));
+          const skins = lines.slice(startIdx, endIdx).join(', ');
 
           return {
             id: item.id,
-            server: extract(/^([A-Z]{2,4})$/m),
-            level: extract(/Level:\s*(.*)/),
-            sku: extract(/SKU:\s*(.*)/),
-            skins: extract(/SKU:.*?\n(.*?)\nHesabın Oluşturulduğu Ülke:/s),
-            country: extract(/Hesabın Oluşturulduğu Ülke:\s*(.*)/),
-            matchHistory: extract(/Karşılaşma Geçmişi:\s*(.*)/),
-            lastGame: extract(/Son Oyun Tarihi:\s*(.*)/),
-            crystals: extract(/Kristali Sayısı:\s*(\d+)/),
-            price: extract(/(₺\d+,\d+)/),
+            server,
+            level,
+            sku,
+            skins,
+            country,
+            matchHistory,
+            lastGame,
+            crystals,
+            price
           };
         });
 
         setAccounts(parsed);
       })
       .catch((error) => {
-        console.error('Veri alınamadı:', error);
+        console.error('Failed to load data:', error);
       });
   }, []);
 
@@ -48,7 +64,7 @@ const Wotne = () => {
 
       <input
         type="text"
-        placeholder="Kostüm veya Şampiyon Ara..."
+        placeholder="Search for a skin or champion..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
         className="search-input"
@@ -57,21 +73,21 @@ const Wotne = () => {
       {filteredAccounts.length > 0 ? (
         filteredAccounts.map((account, index) => (
           <div className="card" key={index}>
-            <h2>{index + 1}. Hesap</h2>
-            <p><strong>Sunucu:</strong> {account.server}</p>
-            <p><strong>Seviye:</strong> {account.level}</p>
+            <h2>Account #{index + 1}</h2>
+            <p><strong>Region:</strong> {account.server}</p>
+            <p><strong>Level:</strong> {account.level}</p>
             <p><strong>SKU:</strong> {account.sku}</p>
-            <p><strong>Kostümler:</strong> {account.skins}</p>
-            <p><strong>Ülke:</strong> {account.country}</p>
-            <p><strong>Oyun Geçmişi:</strong> {account.matchHistory}</p>
-            <p><strong>Son Oyun:</strong> {account.lastGame}</p>
-            <p><strong>Kristal:</strong> {account.crystals}</p>
-            <p><strong>Fiyat:</strong> {account.price}</p>
+            <p><strong>Skins:</strong> {account.skins}</p>
+            <p><strong>Country:</strong> {account.country}</p>
+            <p><strong>Match History:</strong> {account.matchHistory}</p>
+            <p><strong>Last Game:</strong> {account.lastGame}</p>
+            <p><strong>Skin Shards:</strong> {account.crystals}</p>
+            <p><strong>Price:</strong> {account.price}</p>
             <hr />
           </div>
         ))
       ) : (
-        <p>Eşleşen hesap bulunamadı.</p>
+        <p>No matching accounts found.</p>
       )}
     </div>
   );
