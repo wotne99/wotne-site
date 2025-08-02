@@ -1,16 +1,14 @@
-/* Genel arka plan ve yazı ayarları */
 body {
   background: white;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
   font-family: 'Segoe UI', sans-serif;
-  color: #ccc; /* metalik gri ton */
+  color: #ccc;
   min-height: 100vh;
   position: relative;
 }
 
-/* Konteyner ve arama çubuğu */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -31,7 +29,6 @@ body {
   display: block;
 }
 
-/* Hesap kartları */
 .card {
   background: #111;
   border: 1px solid #444;
@@ -42,13 +39,11 @@ body {
   text-align: left;
 }
 
-/* SPECIAL hesaplara özel görünüm */
 .card.special {
   border: 2px solid gold;
   background: #1a1a1a;
 }
 
-/* Kart başlıkları */
 .card h2 {
   color: #eee;
   font-size: 1.5rem;
@@ -60,7 +55,6 @@ body {
   color: #bbb;
 }
 
-/* Donut görselleri */
 .donut {
   position: absolute;
   width: 64px;
@@ -73,7 +67,6 @@ body {
   transform: rotate(0deg);
 }
 
-/* Sayfalama */
 .pagination {
   margin-top: 20px;
   display: flex;
@@ -101,10 +94,17 @@ body {
   cursor: not-allowed;
 }
 
-/* Sayfalama bilgi metni */
 .pagination-info {
   margin: 20px 0 10px;
   font-size: 0.9rem;
   color: #999;
   text-align: center;
+}
+
+mark {
+  background-color: yellow;
+  color: black;
+  font-weight: bold;
+  padding: 0 4px;
+  border-radius: 2px;
 }
