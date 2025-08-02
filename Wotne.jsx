@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import './index.css';
 
+// Özel yuvarlama fonksiyonu
+const roundToNearestHalfOrWhole = (num) => {
+  const floor = Math.floor(num);
+  const decimal = num - floor;
+
+  if (decimal < 0.25) return floor;
+  if (decimal < 0.75) return floor + 0.5;
+  return Math.ceil(num);
+};
+
 const Wotne = () => {
   const [accounts, setAccounts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,6 +38,17 @@ const Wotne = () => {
           const priceMatch = text.match(/₺\d+[.,]?\d*/);
           const price = priceMatch ? priceMatch[0] : 'undefined';
 
+          // Dolar fiyatı hesaplama ve yuvarlama
+          let priceUsd = 'undefined';
+          if (priceMatch) {
+            const priceNumber = parseFloat(priceMatch[0].replace('₺', '').replace(',', '.'));
+            const dollarRate = 40.65;
+            const usdBase = priceNumber / dollarRate;
+            const usdIncreased = usdBase * 1.75;
+            const usdRounded = roundToNearestHalfOrWhole(usdIncreased);
+            priceUsd = `$${usdRounded.toFixed(2)}`;
+          }
+
           // Skins: between SKU and Country
           const startIdx = lines.findIndex((l) => l.startsWith('SKU:')) + 1;
           const endIdx = lines.findIndex((l) => l.startsWith('Account Creation Country:'));
@@ -43,7 +64,8 @@ const Wotne = () => {
             matchHistory,
             lastGame,
             crystals,
-            price
+            price,
+            priceUsd,
           };
         });
 
@@ -82,7 +104,8 @@ const Wotne = () => {
             <p><strong>Match History:</strong> {account.matchHistory}</p>
             <p><strong>Last Game:</strong> {account.lastGame}</p>
             <p><strong>Skin Shards:</strong> {account.crystals}</p>
-            <p><strong>Price:</strong> {account.price}</p>
+            <p><strong>Price (₺):</strong> {account.price}</p>
+            <p><strong>Price (USD):</strong> {account.priceUsd}</p>
             <hr />
           </div>
         ))
