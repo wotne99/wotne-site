@@ -1,71 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WOTNE Hesap Kataloğu</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #fff;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-    }
-    .account {
-      background: #222;
-      border: 1px solid #333;
-      padding: 15px;
-      margin: 20px auto;
-      max-width: 600px;
-      border-radius: 10px;
-    }
-    .account h3 {
-      margin-top: 0;
-    }
-    hr {
-      border: 0;
-      border-top: 1px solid #444;
-    }
-  </style>
-</head>
-<body>
-  <h1>WOTNE Hesap Kataloğu</h1>
-  <div id="accounts-container">Yükleniyor...</div>
-
-  <script>
-    fetch('/accounts.json')
-      .then(response => response.json())
-      .then(data => {
-        const container = document.getElementById('accounts-container');
-        container.innerHTML = ''; // "Yükleniyor..." yazısını temizle
-
-        data.forEach((item, index) => {
-          const div = document.createElement('div');
-          div.classList.add('account');
-          div.innerHTML = `
-            <h3>${index + 1}. Hesap</h3>
-            <p><strong>Sunucu:</strong> ${item.sunucu}</p>
-            <p><strong>Seviye:</strong> ${item.seviye}</p>
-            <p><strong>SKU:</strong> ${item.sku}</p>
-            <p><strong>Kostümler:</strong> ${item.kostumler}</p>
-            <p><strong>Ülke:</strong> ${item.ulke}</p>
-            <p><strong>Oyun Geçmişi:</strong> ${item.gecmis}</p>
-            <p><strong>Son Oyun:</strong> ${item.son_oyun}</p>
-            <p><strong>Kristal:</strong> ${item.kristal}</p>
-            <p><strong>Fiyat:</strong> ${item.fiyat}</p>
-            <hr/>
-          `;
-          container.appendChild(div);
-        });
-      })
-      .catch(error => {
-        document.getElementById('accounts-container').innerHTML = 'Veriler alınamadı.';
-        console.error("JSON verisi alınamadı:", error);
-      });
-  </script>
-</body>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WOTNE Hesaplar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body style="background-color: black; color: white;">
+    <div id="root"></div>
+    <script type="module" src="/main.jsx"></script>
+  </body>
 </html>
