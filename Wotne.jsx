@@ -11,6 +11,14 @@ const roundToNearestHalfOrWhole = (num) => {
   return Math.ceil(num);
 };
 
+// TAG üretici
+const generateTag = (server, id, level) => {
+  const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const safeServer = server || 'XX';
+  const safeLevel = level || '00';
+  return `${safeServer}-${id}-${safeLevel}-${randomPart}`;
+};
+
 const Wotne = () => {
   const [accounts, setAccounts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -30,7 +38,6 @@ const Wotne = () => {
 
           const server = lines[0] || 'undefined';
           const level = getValue('Level:');
-          const sku = getValue('SKU:');
           const country = getValue('Account Creation Country:');
           const matchHistory = getValue('Match History:');
           const lastGame = getValue('Last Game Date:');
@@ -53,11 +60,13 @@ const Wotne = () => {
           const endIdx = lines.findIndex((l) => l.startsWith('Account Creation Country:'));
           const skins = lines.slice(startIdx, endIdx).join(', ');
 
+          const tag = generateTag(server, item.id, level);
+
           return {
             id: item.id,
             server,
             level,
-            sku,
+            tag,
             skins,
             country,
             matchHistory,
@@ -96,7 +105,7 @@ const Wotne = () => {
             <h2>Account #{index + 1}</h2>
             <p><strong>Region:</strong> {account.server}</p>
             <p><strong>Level:</strong> {account.level}</p>
-            <p><strong>SKU:</strong> {account.sku}</p>
+            <p><strong>Tag:</strong> {account.tag}</p>
             <p><strong>Skins:</strong> {account.skins}</p>
             <p><strong>Country:</strong> {account.country}</p>
             <p><strong>Match History:</strong> {account.matchHistory}</p>
