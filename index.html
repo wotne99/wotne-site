@@ -37,7 +37,7 @@
   <div id="accounts-container">Yükleniyor...</div>
 
   <script>
-    fetch('accounts.json')
+    fetch('/accounts.json')
       .then(response => response.json())
       .then(data => {
         const container = document.getElementById('accounts-container');
