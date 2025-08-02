@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './index.css';
 
-// Özel yuvarlama fonksiyonu
+// Fiyat yuvarlama
 const roundToNearestHalfOrWhole = (num) => {
   const floor = Math.floor(num);
   const decimal = num - floor;
@@ -10,24 +10,25 @@ const roundToNearestHalfOrWhole = (num) => {
   return Math.ceil(num);
 };
 
+// Mini checksum (TAG için)
+const generateChecksum = (input) => {
+  let sum = 0;
+  for (let i = 0; i < input.length; i++) {
+    sum += input.charCodeAt(i) * (i + 1);
+  }
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  return [
+    chars[sum % chars.length],
+    chars[(sum + 11) % chars.length],
+    chars[(sum + 23) % chars.length],
+  ].join('');
+};
+
 const Wotne = () => {
   const [accounts, setAccounts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const accountsPerPage = 10;
-
-  const generateChecksum = (input) => {
-    let sum = 0;
-    for (let i = 0; i < input.length; i++) {
-      sum += input.charCodeAt(i) * (i + 1);
-    }
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return [
-      chars[sum % chars.length],
-      chars[(sum + 11) % chars.length],
-      chars[(sum + 23) % chars.length]
-    ].join('');
-  };
 
   useEffect(() => {
     fetch('/accounts.json')
@@ -36,6 +37,7 @@ const Wotne = () => {
         const parsed = data.map((item) => {
           const text = item.text;
           const lines = text.split('\n').map((line) => line.trim());
+
           const getValue = (prefix) => {
             const line = lines.find((l) => l.startsWith(prefix));
             return line ? line.replace(prefix, '').trim() : 'undefined';
@@ -49,6 +51,7 @@ const Wotne = () => {
           const lastGame = getValue('Last Game Date:');
           const crystals = getValue('Total Skin Shard Count of Account:');
           const priceMatch = text.match(/₺\d+[.,]?\d*/);
+          const price = priceMatch ? priceMatch[0] : 'undefined';
 
           let priceUsd = 'undefined';
           if (priceMatch) {
@@ -78,13 +81,15 @@ const Wotne = () => {
             matchHistory,
             lastGame,
             crystals,
-            priceUsd
+            priceUsd,
           };
         });
 
         setAccounts(parsed);
       })
-      .catch((error) => console.error('Failed to load data:', error));
+      .catch((error) => {
+        console.error('Failed to load data:', error);
+      });
   }, []);
 
   const filteredAccounts = accounts.filter((acc) =>
@@ -92,13 +97,32 @@ const Wotne = () => {
   );
 
   const totalPages = Math.ceil(filteredAccounts.length / accountsPerPage);
-  const currentAccounts = filteredAccounts.slice(
-    (currentPage - 1) * accountsPerPage,
-    currentPage * accountsPerPage
-  );
+  const indexOfLastAccount = currentPage * accountsPerPage;
+  const indexOfFirstAccount = indexOfLastAccount - accountsPerPage;
+  const currentAccounts = filteredAccounts.slice(indexOfFirstAccount, indexOfLastAccount);
 
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const nextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
+  const firstPage = () => setCurrentPage(1);
+  const lastPage = () => setCurrentPage(totalPages);
+
+  const getPageNumbers = () => {
+    const maxPageButtons = 9;
+    const pages = [];
+
+    let start = Math.max(currentPage - 4, 1);
+    let end = Math.min(start + maxPageButtons - 1, totalPages);
+
+    if (end - start < maxPageButtons - 1) {
+      start = Math.max(end - maxPageButtons + 1, 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    return pages;
   };
 
   return (
@@ -111,7 +135,7 @@ const Wotne = () => {
         value={searchTerm}
         onChange={(e) => {
           setSearchTerm(e.target.value.toLowerCase());
-          setCurrentPage(1); // Arama değişince sayfayı başa sar
+          setCurrentPage(1);
         }}
         className="search-input"
       />
@@ -119,7 +143,7 @@ const Wotne = () => {
       {currentAccounts.length > 0 ? (
         currentAccounts.map((account, index) => (
           <div className="card" key={index}>
-            <h2>TAG: {account.tag}</h2>
+            <h2>{`TAG: ${account.tag}`}</h2>
             <p><strong>Region:</strong> {account.server}</p>
             <p><strong>Level:</strong> {account.level}</p>
             <p><strong>Skins:</strong> {account.skins}</p>
@@ -135,26 +159,27 @@ const Wotne = () => {
         <p>No matching accounts found.</p>
       )}
 
-      {/* Sayfalama */}
-      {totalPages > 1 && (
-        <div className="pagination">
-          <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-            {"<"}
+      {/* Sayfalama metni */}
+      <p className="pagination-info">
+        {`${filteredAccounts.length} hesap arasından ${indexOfFirstAccount + 1} - ${Math.min(indexOfLastAccount, filteredAccounts.length)} arasındaki sonuçlar görüntüleniyor.`}
+      </p>
+
+      {/* Pagination */}
+      <div className="pagination">
+        <button onClick={firstPage} disabled={currentPage === 1}>{'<<'}</button>
+        <button onClick={prevPage} disabled={currentPage === 1}>{'<'}</button>
+        {getPageNumbers().map((num) => (
+          <button
+            key={num}
+            onClick={() => paginate(num)}
+            className={currentPage === num ? 'active' : ''}
+          >
+            {num}
           </button>
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => handlePageChange(i + 1)}
-              className={currentPage === i + 1 ? 'active' : ''}
-            >
-              {i + 1}
-            </button>
-          ))}
-          <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
-            {">"}
-          </button>
-        </div>
-      )}
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>{'>'}</button>
+        <button onClick={lastPage} disabled={currentPage === totalPages}>{'>>'}</button>
+      </div>
     </div>
   );
 };
