@@ -144,8 +144,10 @@ const Wotne = () => {
   }, []);
 
   const filteredAccounts = accounts.filter((acc) =>
-    acc.skins.toLowerCase().includes(searchTerm)
-  );
+  acc.skins.toLowerCase().includes(searchTerm) ||
+  acc.tag.toLowerCase().includes(searchTerm)
+);
+
 
   const totalPages = Math.ceil(filteredAccounts.length / accountsPerPage);
   const indexOfLastAccount = currentPage * accountsPerPage;
