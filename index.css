@@ -1,17 +1,21 @@
-
 body {
-  background: black url('/donut.png');
-  background-size: 100px;
+  background-image: url('/donut.png');
+  background-repeat: repeat;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
   font-family: 'Segoe UI', sans-serif;
-  color: #eee;
+  color: #ccc;
+  min-height: 100vh;
+  position: relative;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  z-index: 2;
+  position: relative;
   text-align: center;
 }
 
@@ -26,40 +30,88 @@ body {
   display: block;
 }
 
-.card-grid {
-  display: grid;
-  grid-template-columns: 1fr 3fr;
-  gap: 24px;
+.card {
   background: #111;
   border: 1px solid #444;
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   text-align: left;
 }
 
-.card-grid.special {
+.card.special {
   border: 2px solid gold;
   background: #1a1a1a;
 }
 
-.card-grid .left-col {
-  border-right: 1px solid #333;
-  padding-right: 16px;
+.layout-card {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
 }
 
-.card-grid .right-col {
+.left-box {
+  width: 250px;
+  border-right: 1px solid #555;
+  padding-right: 16px;
+  flex-shrink: 0;
+}
+
+.left-box h2 {
+  font-size: 1.2rem;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.right-box {
+  flex-grow: 1;
   padding-left: 16px;
 }
 
-.card-grid h2 {
-  margin-top: 0;
-  color: #fff;
+.card h2 {
+  color: #eee;
+  font-size: 1.5rem;
+  margin-bottom: 12px;
 }
 
-.card-grid p {
+.card p {
   margin: 4px 0;
-  color: #ccc;
+  color: #bbb;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  background: #222;
+  border: 1px solid #555;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination button.active {
+  background-color: #3498db;
+  font-weight: bold;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  margin: 20px 0 10px;
+  font-size: 0.9rem;
+  color: #999;
+  text-align: center;
 }
 
 mark {
