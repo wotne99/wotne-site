@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import './index.css';
 
@@ -41,7 +40,7 @@ const Wotne = () => {
           const server = isSpecial ? lines[1] : lines[0];
           const getValue = (prefix) => {
             const line = lines.find((l) => l.startsWith(prefix));
-            return line ? line.replace(prefix, '').trim() : 'undefined';
+            return line ? line.replace(prefix, '').trim() : 'N/A';
           };
 
           const level = getValue('Level:');
@@ -51,9 +50,9 @@ const Wotne = () => {
           const lastGame = getValue('Last Game Date:');
           const crystals = getValue('Total Skin Shard Count of Account:');
           const priceMatch = text.match(/₺\d+[.,]?\d*/);
-          const price = priceMatch ? priceMatch[0] : 'undefined';
+          const price = priceMatch ? priceMatch[0] : 'N/A';
 
-          let priceUsd = 'undefined';
+          let priceUsd = 'N/A';
           if (priceMatch) {
             const priceNumber = parseFloat(priceMatch[0].replace('₺', '').replace(',', '.'));
             const dollarRate = 40.65;
@@ -71,15 +70,20 @@ const Wotne = () => {
           const checksum = generateChecksum(lastGame + skins);
           const tag = `${server}-${skuDigits}-${checksum}`;
 
-          let blueEssence = 'N/A';
-          let orangeEssence = 'N/A';
-          if (isSpecial) {
-            const priceIndex = lines.findIndex(l => l.includes('₺'));
-            if (priceIndex >= 3) {
-              blueEssence = lines[priceIndex - 3];
-              orangeEssence = lines[priceIndex - 2];
-            }
-          }
+          // Blue/Orange Essence sayıları en sondan alınır
+          const reversedLines = [...lines].reverse();
+          const essenceNumbers = reversedLines
+            .filter((line) => /^\d+$/.test(line))
+            .slice(0, 3)
+            .map((num) => parseInt(num));
+
+          const blueEssence = essenceNumbers[2] ?? 'N/A';
+          const orangeEssence = essenceNumbers[1] ?? 'N/A';
+
+          // Ek bilgiler
+          const warranty = text.includes('7 Days Warranty') ? '✔ 7 Days Warranty' : '❌';
+          const recovery = text.includes('Recovery Info Available') ? '✔ Recovery Info' : '❌';
+          const unverified = text.includes('Unverified Email') ? '✔ Unverified Mail' : '❌';
 
           return {
             id: item.id,
@@ -92,9 +96,12 @@ const Wotne = () => {
             lastGame,
             crystals,
             priceUsd,
+            isSpecial,
             blueEssence,
             orangeEssence,
-            isSpecial,
+            warranty,
+            recovery,
+            unverified,
           };
         });
 
@@ -123,14 +130,18 @@ const Wotne = () => {
   const getPageNumbers = () => {
     const maxPageButtons = 9;
     const pages = [];
+
     let start = Math.max(currentPage - 4, 1);
     let end = Math.min(start + maxPageButtons - 1, totalPages);
+
     if (end - start < maxPageButtons - 1) {
       start = Math.max(end - maxPageButtons + 1, 1);
     }
+
     for (let i = start; i <= end; i++) {
       pages.push(i);
     }
+
     return pages;
   };
 
@@ -145,6 +156,7 @@ const Wotne = () => {
   return (
     <div className="container">
       <h1>DONUT ACCOUNTS</h1>
+
       <input
         type="text"
         placeholder="Search for a skin or champion..."
@@ -155,8 +167,9 @@ const Wotne = () => {
         }}
         className="search-input"
       />
-      <div className="grid">
-        {currentAccounts.map((account, index) => (
+
+      {currentAccounts.length > 0 ? (
+        currentAccounts.map((account, index) => (
           <div className={`card ${account.isSpecial ? 'special' : ''}`} key={index}>
             <h2>
               TAG: {account.tag}{' '}
@@ -171,14 +184,21 @@ const Wotne = () => {
             <p><strong>Skin Shards:</strong> {account.crystals}</p>
             <p><strong>Blue Essence:</strong> {account.blueEssence}</p>
             <p><strong>Orange Essence:</strong> {account.orangeEssence}</p>
+            <p><strong>{account.warranty}</strong></p>
+            <p><strong>{account.recovery}</strong></p>
+            <p><strong>{account.unverified}</strong></p>
             <p><strong>Price (USD):</strong> {account.priceUsd}</p>
             <hr />
           </div>
-        ))}
-      </div>
+        ))
+      ) : (
+        <p>No matching accounts found.</p>
+      )}
+
       <p className="pagination-info">
         Showing {indexOfFirstAccount + 1} - {Math.min(indexOfLastAccount, filteredAccounts.length)} of {filteredAccounts.length} results.
       </p>
+
       <div className="pagination">
         <button onClick={firstPage} disabled={currentPage === 1}>{'<<'}</button>
         <button onClick={prevPage} disabled={currentPage === 1}>{'<'}</button>
