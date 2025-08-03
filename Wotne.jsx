@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import './index.css';
 
@@ -70,6 +71,16 @@ const Wotne = () => {
           const checksum = generateChecksum(lastGame + skins);
           const tag = `${server}-${skuDigits}-${checksum}`;
 
+          let blueEssence = 'N/A';
+          let orangeEssence = 'N/A';
+          if (isSpecial) {
+            const priceIndex = lines.findIndex(l => l.includes('₺'));
+            if (priceIndex >= 3) {
+              blueEssence = lines[priceIndex - 3];
+              orangeEssence = lines[priceIndex - 2];
+            }
+          }
+
           return {
             id: item.id,
             tag,
@@ -81,6 +92,8 @@ const Wotne = () => {
             lastGame,
             crystals,
             priceUsd,
+            blueEssence,
+            orangeEssence,
             isSpecial,
           };
         });
@@ -110,18 +123,14 @@ const Wotne = () => {
   const getPageNumbers = () => {
     const maxPageButtons = 9;
     const pages = [];
-
     let start = Math.max(currentPage - 4, 1);
     let end = Math.min(start + maxPageButtons - 1, totalPages);
-
     if (end - start < maxPageButtons - 1) {
       start = Math.max(end - maxPageButtons + 1, 1);
     }
-
     for (let i = start; i <= end; i++) {
       pages.push(i);
     }
-
     return pages;
   };
 
@@ -136,7 +145,6 @@ const Wotne = () => {
   return (
     <div className="container">
       <h1>DONUT ACCOUNTS</h1>
-
       <input
         type="text"
         placeholder="Search for a skin or champion..."
@@ -147,9 +155,8 @@ const Wotne = () => {
         }}
         className="search-input"
       />
-
-      {currentAccounts.length > 0 ? (
-        currentAccounts.map((account, index) => (
+      <div className="grid">
+        {currentAccounts.map((account, index) => (
           <div className={`card ${account.isSpecial ? 'special' : ''}`} key={index}>
             <h2>
               TAG: {account.tag}{' '}
@@ -162,18 +169,16 @@ const Wotne = () => {
             <p><strong>Match History:</strong> {account.matchHistory}</p>
             <p><strong>Last Game:</strong> {account.lastGame}</p>
             <p><strong>Skin Shards:</strong> {account.crystals}</p>
+            <p><strong>Blue Essence:</strong> {account.blueEssence}</p>
+            <p><strong>Orange Essence:</strong> {account.orangeEssence}</p>
             <p><strong>Price (USD):</strong> {account.priceUsd}</p>
             <hr />
           </div>
-        ))
-      ) : (
-        <p>No matching accounts found.</p>
-      )}
-
+        ))}
+      </div>
       <p className="pagination-info">
         Showing {indexOfFirstAccount + 1} - {Math.min(indexOfLastAccount, filteredAccounts.length)} of {filteredAccounts.length} results.
       </p>
-
       <div className="pagination">
         <button onClick={firstPage} disabled={currentPage === 1}>{'<<'}</button>
         <button onClick={prevPage} disabled={currentPage === 1}>{'<'}</button>
