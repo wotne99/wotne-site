@@ -22,11 +22,44 @@ const generateChecksum = (input) => {
   ].join('');
 };
 
+// ✅ Donut konumlarını üreten fonksiyon
+const generateDonutPositions = (count, minDistance) => {
+  const donuts = [];
+
+  let tries = 0;
+  while (donuts.length < count && tries < 1000) {
+    const size = Math.floor(Math.random() * 51) + 30; // 30-80px
+    const left = Math.random() * 100;
+    const top = Math.random() * 100;
+    const rotation = Math.floor(Math.random() * 360);
+
+    const tooClose = donuts.some((d) => {
+      const dx = (d.left - left) * window.innerWidth / 100;
+      const dy = (d.top - top) * window.innerHeight / 100;
+      return Math.sqrt(dx * dx + dy * dy) < minDistance;
+    });
+
+    if (!tooClose) {
+      donuts.push({ size, left, top, rotation });
+    }
+
+    tries++;
+  }
+
+  return donuts;
+};
+
 const Wotne = () => {
   const [accounts, setAccounts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [donutPositions, setDonutPositions] = useState([]);
   const accountsPerPage = 10;
+
+  useEffect(() => {
+    const positions = generateDonutPositions(20, 100);
+    setDonutPositions(positions);
+  }, []);
 
   useEffect(() => {
     fetch('/accounts.json')
@@ -152,65 +185,85 @@ const Wotne = () => {
   };
 
   return (
-    <div className="container">
-      <h1>DONUT ACCOUNTS</h1>
-
-      <input
-        type="text"
-        placeholder="Search for a skin or champion..."
-        value={searchTerm}
-        onChange={(e) => {
-          setSearchTerm(e.target.value.toLowerCase());
-          setCurrentPage(1);
-        }}
-        className="search-input"
-      />
-
-      {currentAccounts.length > 0 ? (
-        currentAccounts.map((account, index) => (
-          <div className={`card layout-card ${account.isSpecial ? 'special' : ''}`} key={index}>
-            <div className="left-box">
-              <h2>{account.tag}</h2>
-              <p><strong>Blue Essence:</strong> {account.blueEssence}</p>
-              <p><strong>Orange Essence:</strong> {account.orangeEssence}</p>
-              <p><strong>Price (USD):</strong> {account.priceUsd}</p>
-            </div>
-            <div className="right-box">
-              <p><strong>Skins:</strong> {highlightSkins(account.skins, searchTerm)}</p>
-              <p><strong>Country:</strong> {account.country}</p>
-              <p><strong>Match History:</strong> {account.matchHistory}</p>
-              <p><strong>Last Game:</strong> {account.lastGame}</p>
-              <p><strong>Skin Shards:</strong> {account.crystals}</p>
-              <p><strong>{account.warranty}</strong></p>
-              <p><strong>{account.recovery}</strong></p>
-              <p><strong>{account.unverified}</strong></p>
-            </div>
-          </div>
-        ))
-      ) : (
-        <p>No matching accounts found.</p>
-      )}
-
-      <p className="pagination-info">
-        Showing {indexOfFirstAccount + 1} - {Math.min(indexOfLastAccount, filteredAccounts.length)} of {filteredAccounts.length} results.
-      </p>
-
-      <div className="pagination">
-        <button onClick={firstPage} disabled={currentPage === 1}>{'<<'}</button>
-        <button onClick={prevPage} disabled={currentPage === 1}>{'<'}</button>
-        {getPageNumbers().map((num) => (
-          <button
-            key={num}
-            onClick={() => paginate(num)}
-            className={currentPage === num ? 'active' : ''}
-          >
-            {num}
-          </button>
+    <>
+      {/* 🔵 Arka plan donutları */}
+      <div className="donut-bg">
+        {donutPositions.map((d, i) => (
+          <div
+            key={i}
+            className="donut"
+            style={{
+              width: `${d.size}px`,
+              height: `${d.size}px`,
+              left: `${d.left}%`,
+              top: `${d.top}%`,
+              transform: `rotate(${d.rotation}deg)`,
+            }}
+          />
         ))}
-        <button onClick={nextPage} disabled={currentPage === totalPages}>{'>'}</button>
-        <button onClick={lastPage} disabled={currentPage === totalPages}>{'>>'}</button>
       </div>
-    </div>
+
+      {/* 🔵 Asıl içerik */}
+      <div className="container">
+        <h1>DONUT ACCOUNTS</h1>
+
+        <input
+          type="text"
+          placeholder="Search for a skin or champion..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value.toLowerCase());
+            setCurrentPage(1);
+          }}
+          className="search-input"
+        />
+
+        {currentAccounts.length > 0 ? (
+          currentAccounts.map((account, index) => (
+            <div className={`card layout-card ${account.isSpecial ? 'special' : ''}`} key={index}>
+              <div className="left-box">
+                <h2>{account.tag}</h2>
+                <p><strong>Blue Essence:</strong> {account.blueEssence}</p>
+                <p><strong>Orange Essence:</strong> {account.orangeEssence}</p>
+                <p><strong>Price (USD):</strong> {account.priceUsd}</p>
+              </div>
+              <div className="right-box">
+                <p><strong>Skins:</strong> {highlightSkins(account.skins, searchTerm)}</p>
+                <p><strong>Country:</strong> {account.country}</p>
+                <p><strong>Match History:</strong> {account.matchHistory}</p>
+                <p><strong>Last Game:</strong> {account.lastGame}</p>
+                <p><strong>Skin Shards:</strong> {account.crystals}</p>
+                <p><strong>{account.warranty}</strong></p>
+                <p><strong>{account.recovery}</strong></p>
+                <p><strong>{account.unverified}</strong></p>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p>No accounts found matching ‘{searchTerm}’.</p>
+        )}
+
+        <p className="pagination-info">
+          Showing {indexOfFirstAccount + 1} - {Math.min(indexOfLastAccount, filteredAccounts.length)} of {filteredAccounts.length} results.
+        </p>
+
+        <div className="pagination">
+          <button onClick={firstPage} disabled={currentPage === 1}>{'<<'}</button>
+          <button onClick={prevPage} disabled={currentPage === 1}>{'<'}</button>
+          {getPageNumbers().map((num) => (
+            <button
+              key={num}
+              onClick={() => paginate(num)}
+              className={currentPage === num ? 'active' : ''}
+            >
+              {num}
+            </button>
+          ))}
+          <button onClick={nextPage} disabled={currentPage === totalPages}>{'>'}</button>
+          <button onClick={lastPage} disabled={currentPage === totalPages}>{'>>'}</button>
+        </div>
+      </div>
+    </>
   );
 };
 
