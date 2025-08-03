@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import './index.css';
 
@@ -35,14 +36,12 @@ const Wotne = () => {
         const parsed = data.map((item) => {
           const text = item.text;
           const lines = text.split('\n').map((line) => line.trim());
-
           const isSpecial = lines[0] === 'SPECIAL Account';
           const server = isSpecial ? lines[1] : lines[0];
           const getValue = (prefix) => {
             const line = lines.find((l) => l.startsWith(prefix));
             return line ? line.replace(prefix, '').trim() : 'N/A';
           };
-
           const level = getValue('Level:');
           const sku = getValue('SKU:');
           const country = getValue('Account Creation Country:');
@@ -51,7 +50,12 @@ const Wotne = () => {
           const crystals = getValue('Total Skin Shard Count of Account:');
           const priceMatch = text.match(/₺\d+[.,]?\d*/);
           const price = priceMatch ? priceMatch[0] : 'N/A';
-
+          const textLower = text.toLowerCase();
+          const hasWarranty = textLower.includes('7 days warranty');
+          const hasRecovery = textLower.includes('recovery info');
+          const hasUnverified = textLower.includes('unverified email');
+          const blueEssence = lines.find(l => /^\d+$/.test(l)) || 'N/A';
+          const orangeEssence = lines.find((l, idx) => /^\d+$/.test(l) && lines[idx + 1] === '0') || 'N/A';
           let priceUsd = 'N/A';
           if (priceMatch) {
             const priceNumber = parseFloat(priceMatch[0].replace('₺', '').replace(',', '.'));
@@ -61,29 +65,12 @@ const Wotne = () => {
             const usdRounded = roundToNearestHalfOrWhole(usdIncreased);
             priceUsd = `$${usdRounded.toFixed(2)}`;
           }
-
           const startIdx = lines.findIndex((l) => l.startsWith('SKU:')) + 1;
           const endIdx = lines.findIndex((l) => l.startsWith('Account Creation Country:'));
           const skins = lines.slice(startIdx, endIdx).join(', ');
-
           const skuDigits = sku.match(/\d+$/)?.[0] || '000';
           const checksum = generateChecksum(lastGame + skins);
           const tag = `${server}-${skuDigits}-${checksum}`;
-
-          // Blue/Orange Essence sayıları en sondan alınır
-          const reversedLines = [...lines].reverse();
-          const essenceNumbers = reversedLines
-            .filter((line) => /^\d+$/.test(line))
-            .slice(0, 3)
-            .map((num) => parseInt(num));
-
-          const blueEssence = essenceNumbers[2] ?? 'N/A';
-          const orangeEssence = essenceNumbers[1] ?? 'N/A';
-
-          // Ek bilgiler
-          const warranty = text.includes('7 Days Warranty') ? '✔ 7 Days Warranty' : '❌';
-          const recovery = text.includes('Recovery Info Available') ? '✔ Recovery Info' : '❌';
-          const unverified = text.includes('Unverified Email') ? '✔ Unverified Mail' : '❌';
 
           return {
             id: item.id,
@@ -99,12 +86,11 @@ const Wotne = () => {
             isSpecial,
             blueEssence,
             orangeEssence,
-            warranty,
-            recovery,
-            unverified,
+            hasWarranty,
+            hasRecovery,
+            hasUnverified,
           };
         });
-
         setAccounts(parsed);
       })
       .catch((error) => {
@@ -122,26 +108,15 @@ const Wotne = () => {
   const currentAccounts = filteredAccounts.slice(indexOfFirstAccount, indexOfLastAccount);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-  const nextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-  const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
-  const firstPage = () => setCurrentPage(1);
-  const lastPage = () => setCurrentPage(totalPages);
-
   const getPageNumbers = () => {
     const maxPageButtons = 9;
     const pages = [];
-
     let start = Math.max(currentPage - 4, 1);
     let end = Math.min(start + maxPageButtons - 1, totalPages);
-
     if (end - start < maxPageButtons - 1) {
       start = Math.max(end - maxPageButtons + 1, 1);
     }
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
+    for (let i = start; i <= end; i++) pages.push(i);
     return pages;
   };
 
@@ -156,7 +131,6 @@ const Wotne = () => {
   return (
     <div className="container">
       <h1>DONUT ACCOUNTS</h1>
-
       <input
         type="text"
         placeholder="Search for a skin or champion..."
@@ -167,53 +141,26 @@ const Wotne = () => {
         }}
         className="search-input"
       />
-
-      {currentAccounts.length > 0 ? (
-        currentAccounts.map((account, index) => (
-          <div className={`card ${account.isSpecial ? 'special' : ''}`} key={index}>
-            <h2>
-              TAG: {account.tag}{' '}
-              {account.isSpecial && <span style={{ color: 'gold', fontSize: '1rem' }}>⭐ SPECIAL</span>}
-            </h2>
-            <p><strong>Region:</strong> {account.server}</p>
-            <p><strong>Level:</strong> {account.level}</p>
+      {currentAccounts.map((account, index) => (
+        <div className={`card-grid ${account.isSpecial ? 'special' : ''}`} key={index}>
+          <div className="left-col">
+            <h2>{account.tag}</h2>
+            <p><strong>Blue Essence:</strong> {account.blueEssence}</p>
+            <p><strong>Orange Essence:</strong> {account.orangeEssence}</p>
+            <p><strong>Price (USD):</strong> {account.priceUsd}</p>
+          </div>
+          <div className="right-col">
             <p><strong>Skins:</strong> {highlightSkins(account.skins, searchTerm)}</p>
             <p><strong>Country:</strong> {account.country}</p>
             <p><strong>Match History:</strong> {account.matchHistory}</p>
             <p><strong>Last Game:</strong> {account.lastGame}</p>
             <p><strong>Skin Shards:</strong> {account.crystals}</p>
-            <p><strong>Blue Essence:</strong> {account.blueEssence}</p>
-            <p><strong>Orange Essence:</strong> {account.orangeEssence}</p>
-            <p><strong>{account.warranty}</strong></p>
-            <p><strong>{account.recovery}</strong></p>
-            <p><strong>{account.unverified}</strong></p>
-            <p><strong>Price (USD):</strong> {account.priceUsd}</p>
-            <hr />
+            {account.hasWarranty && <p>✓ <strong>7 Days Warranty</strong></p>}
+            {account.hasRecovery && <p>✓ <strong>Recovery Info</strong></p>}
+            {account.hasUnverified && <p>✓ <strong>Unverified Mail</strong></p>}
           </div>
-        ))
-      ) : (
-        <p>No matching accounts found.</p>
-      )}
-
-      <p className="pagination-info">
-        Showing {indexOfFirstAccount + 1} - {Math.min(indexOfLastAccount, filteredAccounts.length)} of {filteredAccounts.length} results.
-      </p>
-
-      <div className="pagination">
-        <button onClick={firstPage} disabled={currentPage === 1}>{'<<'}</button>
-        <button onClick={prevPage} disabled={currentPage === 1}>{'<'}</button>
-        {getPageNumbers().map((num) => (
-          <button
-            key={num}
-            onClick={() => paginate(num)}
-            className={currentPage === num ? 'active' : ''}
-          >
-            {num}
-          </button>
-        ))}
-        <button onClick={nextPage} disabled={currentPage === totalPages}>{'>'}</button>
-        <button onClick={lastPage} disabled={currentPage === totalPages}>{'>>'}</button>
-      </div>
+        </div>
+      ))}
     </div>
   );
 };
