@@ -1,6 +1,5 @@
 body {
-  background-image: url('/donut.png');
-  background-repeat: repeat;
+  background-color: #000;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
@@ -8,6 +7,24 @@ body {
   color: #ccc;
   min-height: 100vh;
   position: relative;
+}
+
+.donut-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.donut {
+  position: absolute;
+  background-image: url('/donut.png');
+  background-size: cover;
+  opacity: 0.08;
 }
 
 .container {
