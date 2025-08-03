@@ -210,15 +210,16 @@ const Wotne = () => {
         <h1>DONUT ACCOUNTS</h1>
 
         <input
-          type="text"
-          placeholder="Search for a skin or champion..."
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value.toLowerCase());
-            setCurrentPage(1);
-          }}
-          className="search-input"
-        />
+  type="text"
+  placeholder="Search by skin or tag (e.g., EUW-123)"
+  value={searchTerm}
+  onChange={(e) => {
+    setSearchTerm(e.target.value.toLowerCase());
+    setCurrentPage(1);
+  }}
+  className="search-input"
+/>
+
 
         {currentAccounts.length > 0 ? (
           currentAccounts.map((account, index) => (
